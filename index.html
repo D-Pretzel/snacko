@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Snack-O</title>
+
+<!-- ============================================================= -->
+<!--  HOW TO CUSTOMIZE                                              -->
+<!--  1. Set VENMO_USERNAME below (no @ symbol).                   -->
+<!--  2. Edit the ITEMS list: name, price, and an emoji.           -->
+<!--  3. Optionally change the shop NAME and TAGLINE.              -->
+<!--  That's it. Commit the file and GitHub Pages does the rest.   -->
+<!-- ============================================================= -->
+<script>
+  const CONFIG = {
+    name: "Snack-O",
+    tagline: "Tap what you grabbed, then pay in one tap.",
+    venmoUsername: "your-venmo-username", // <-- change this (no @)
+    items: [
+      { emoji: "🍫", name: "Chocolate bar", price: 2.00 },
+      { emoji: "🥤", name: "Soda",          price: 1.50 },
+      { emoji: "🍪", name: "Cookie",        price: 1.00 },
+      { emoji: "🥨", name: "Pretzels",      price: 1.75 },
+      { emoji: "🍬", name: "Candy",         price: 1.25 },
+      { emoji: "💧", name: "Water",         price: 1.00 },
+    ],
+  };
+</script>
+
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --card: #ffffff;
+    --ink: #14161a;
+    --muted: #6b7280;
+    --line: #e7e9ee;
+    --accent: #008cff;      /* Venmo blue */
+    --accent-press: #0074d4;
+    --shadow: 0 1px 2px rgba(20,22,26,.05), 0 8px 24px rgba(20,22,26,.06);
+    --radius: 18px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e0f12;
+      --card: #17191e;
+      --ink: #f3f4f6;
+      --muted: #9aa1ad;
+      --line: #262a31;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 30px rgba(0,0,0,.45);
+    }
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  }
+
+  .wrap {
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 28px 18px 160px;
+  }
+
+  header { text-align: center; margin: 8px 0 22px; }
+  .logo {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 60px; height: 60px; border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), #4db4ff);
+    font-size: 30px; box-shadow: var(--shadow); margin-bottom: 12px;
+  }
+  h1 { font-size: 26px; font-weight: 750; letter-spacing: -.02em; margin: 0 0 4px; }
+  .tagline { color: var(--muted); font-size: 14.5px; margin: 0; }
+
+  .list { display: flex; flex-direction: column; gap: 10px; }
+
+  .item {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    transition: border-color .18s ease, transform .06s ease;
+  }
+  .item.active { border-color: var(--accent); }
+  .item .emoji {
+    font-size: 26px; width: 40px; height: 40px; flex: 0 0 40px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); border-radius: 12px;
+  }
+  .item .meta { flex: 1 1 auto; min-width: 0; }
+  .item .name { font-weight: 620; font-size: 16px; }
+  .item .price { color: var(--muted); font-size: 13.5px; margin-top: 1px; }
+
+  .stepper { display: flex; align-items: center; gap: 6px; }
+  .stepper button {
+    width: 38px; height: 38px; border-radius: 11px;
+    border: 1px solid var(--line); background: var(--bg);
+    color: var(--ink); font-size: 21px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; user-select: none;
+    transition: transform .06s ease, background .15s ease, opacity .15s ease;
+  }
+  .stepper button:active { transform: scale(.9); }
+  .stepper button.minus { opacity: .35; pointer-events: none; }
+  .item.active .stepper button.minus { opacity: 1; pointer-events: auto; }
+  .stepper .qty {
+    min-width: 22px; text-align: center;
+    font-variant-numeric: tabular-nums; font-weight: 700; font-size: 16px;
+  }
+
+  /* Sticky pay bar */
+  .bar {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-top: 1px solid var(--line);
+  }
+  .bar .inner { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  .totrow { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
+  .totrow .label { color: var(--muted); font-size: 14px; }
+  .totrow .amount { font-size: 24px; font-weight: 780; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+
+  .pay {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; padding: 17px; border: none; border-radius: 15px;
+    background: var(--accent); color: #fff;
+    font-size: 17px; font-weight: 700; font-family: inherit;
+    cursor: pointer; text-decoration: none;
+    transition: transform .06s ease, background .15s ease, opacity .2s ease;
+  }
+  .pay:active { transform: scale(.985); background: var(--accent-press); }
+  .pay.disabled { opacity: .45; pointer-events: none; }
+  .pay .v { font-weight: 800; }
+
+  .hint { text-align: center; color: var(--muted); font-size: 12px; margin: 14px 2px 0; }
+  .hint a { color: var(--muted); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo" id="logo">🍿</div>
+      <h1 id="shopName">Snack-O</h1>
+      <p class="tagline" id="tagline"></p>
+    </header>
+
+    <div class="list" id="list"></div>
+
+    <p class="hint">You pay for what you tap. Prices are per item — add as many as you took.</p>
+  </div>
+
+  <div class="bar">
+    <div class="inner">
+      <div class="totrow">
+        <span class="label" id="count">No items yet</span>
+        <span class="amount" id="total">$0.00</span>
+      </div>
+      <a class="pay disabled" id="payBtn" href="#">
+        Pay with <span class="v">Venmo</span>
+      </a>
+    </div>
+  </div>
+
+<script>
+  const money = n => "$" + n.toFixed(2);
+  const state = CONFIG.items.map(it => ({ ...it, qty: 0 }));
+
+  // Header text
+  document.title = CONFIG.name;
+  document.getElementById("shopName").textContent = CONFIG.name;
+  document.getElementById("tagline").textContent = CONFIG.tagline;
+
+  const list = document.getElementById("list");
+
+  state.forEach((it, i) => {
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `
+      <div class="emoji">${it.emoji}</div>
+      <div class="meta">
+        <div class="name">${it.name}</div>
+        <div class="price">${money(it.price)} each</div>
+      </div>
+      <div class="stepper">
+        <button class="minus" aria-label="Remove one">−</button>
+        <span class="qty">0</span>
+        <button class="plus" aria-label="Add one">+</button>
+      </div>`;
+    const qtyEl = row.querySelector(".qty");
+    const minus = row.querySelector(".minus");
+    row.querySelector(".plus").addEventListener("click", () => { it.qty++; sync(row, it, qtyEl, minus); });
+    minus.addEventListener("click", () => { if (it.qty > 0) it.qty--; sync(row, it, qtyEl, minus); });
+    list.appendChild(row);
+  });
+
+  function sync(row, it, qtyEl, minus) {
+    qtyEl.textContent = it.qty;
+    row.classList.toggle("active", it.qty > 0);
+    minus.classList.toggle("minus", it.qty === 0);
+    updateTotals();
+  }
+
+  const totalEl = document.getElementById("total");
+  const countEl = document.getElementById("count");
+  const payBtn  = document.getElementById("payBtn");
+
+  function updateTotals() {
+    const total = state.reduce((s, it) => s + it.qty * it.price, 0);
+    const count = state.reduce((s, it) => s + it.qty, 0);
+    totalEl.textContent = money(total);
+    countEl.textContent = count === 0 ? "No items yet"
+                        : count + (count === 1 ? " item" : " items");
+
+    if (total <= 0) {
+      payBtn.classList.add("disabled");
+      payBtn.removeAttribute("href");
+      return;
+    }
+    payBtn.classList.remove("disabled");
+
+    // Build a short note listing what was bought, e.g. "2x Cookie, 1x Soda"
+    const note = state.filter(it => it.qty > 0)
+                      .map(it => it.qty + "x " + it.name)
+                      .join(", ");
+
+    const params = new URLSearchParams({
+      txn: "pay",
+      amount: total.toFixed(2),
+      note: note,
+    });
+    payBtn.href = `https://venmo.com/${encodeURIComponent(CONFIG.venmoUsername)}?${params.toString()}`;
+  }
+
+  updateTotals();
+</script>
+</body>
+</html>
