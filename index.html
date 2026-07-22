@@ -28,6 +28,7 @@
     --blue: #3A7BD5;           /* selection blue — active row + plus hover */
     --blue-tint: #E4EEFB;
     --venmo: #008CFF;
+    --paypal: #0070BA;
     --shadow: 0 1px 2px rgba(20,22,26,.04), 0 6px 18px rgba(20,22,26,.05);
     --radius: 12px;
   }
@@ -242,17 +243,36 @@
   .pay.disabled { background: var(--rule); color: var(--muted); pointer-events: none; }
   .pay .arrow { font-family: 'IBM Plex Mono', monospace; font-size: 18px; }
 
+  /* PayPal is the secondary option, so it is outlined rather than filled —
+     two solid slabs stacked are easy to misclick. The 1px border is taken out
+     of the padding so both buttons end up the same height. */
+  .pay.alt {
+    padding: 18px 21px;
+    border: 1px solid var(--rule);
+    background: transparent; color: var(--ink);
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .pay.alt:hover { background: var(--paypal); color: #fff; border-color: var(--paypal); }
+  .pay.alt:focus-visible { outline-color: var(--paypal); }
+  .pay.alt.disabled { background: transparent; border-color: var(--rule); color: var(--muted); opacity: .65; }
+  .pay.alt[hidden] { display: none; }
+
   .pay .label { display: inline-flex; align-items: center; gap: 12px; }
-  .venmo-logo {
+  .venmo-logo, .paypal-logo {
     width: 26px; height: 26px;
     display: inline-flex; align-items: center; justify-content: center;
     border-radius: 7px; padding: 2px;
     background: transparent;
     transition: background .18s ease;
   }
-  .venmo-logo img { width: 100%; height: 100%; display: block; }
+  .venmo-logo img, .paypal-logo img { width: 100%; height: 100%; display: block; }
   .pay:hover .venmo-logo { background: #fff; }
-  .pay.disabled .venmo-logo { opacity: .5; }
+  .pay.disabled .venmo-logo, .pay.disabled .paypal-logo { opacity: .5; }
+
+  /* The PayPal monogram is dark blue on transparent, which disappears against
+     the dark-mode bar and against the blue hover fill, so it keeps a white
+     chip behind it in every state. */
+  .paypal-logo { background: #fff; padding: 3px; }
 
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
@@ -277,6 +297,15 @@
         <div class="line"><span>Items</span><span class="val" id="count">0</span></div>
         <div class="line total"><span>Total</span><span class="val" id="total">$0.00</span></div>
       </div>
+      <a class="pay alt disabled" id="paypalBtn" href="#" hidden>
+        <span class="label">
+          <span class="paypal-logo" aria-hidden="true">
+            <img src="paypal-mark.png" alt="" />
+          </span>
+          <span>Pay with PayPal</span>
+        </span>
+        <span class="arrow">→</span>
+      </a>
       <a class="pay disabled" id="payBtn" href="#">
         <span class="label">
           <span class="venmo-logo" aria-hidden="true">
@@ -318,6 +347,15 @@
   const totalEl = document.getElementById("total");
   const countEl = document.getElementById("count");
   const payBtn  = document.getElementById("payBtn");
+  const paypalBtn = document.getElementById("paypalBtn");
+
+  /* PayPal.me handle, without the "@" or any URL around it — the bit after
+     paypal.me/ in your link. Leave it empty and the PayPal button stays hidden,
+     leaving Venmo as the only way to pay. Unlike the Venmo username this is not
+     in menu.json, so changing it means editing this line.
+     PayPal.me prefills the amount but has no field for a note, so the itemized
+     list only rides along on Venmo payments. */
+  const PAYPAL_HANDLE = "";
 
   let state = [];
   let venmoUsername = "";
@@ -445,12 +483,21 @@
     totalEl.textContent = money(total);
     countEl.textContent = count;
 
+    paypalBtn.hidden = !PAYPAL_HANDLE;
+
     if (total <= 0) {
       payBtn.classList.add("disabled");
       payBtn.removeAttribute("href");
+      paypalBtn.classList.add("disabled");
+      paypalBtn.removeAttribute("href");
       return;
     }
     payBtn.classList.remove("disabled");
+    paypalBtn.classList.remove("disabled");
+
+    /* PayPal.me takes the amount as the last path segment and nothing else —
+       no note, no currency argument. */
+    paypalBtn.href = `https://paypal.me/${encodeURIComponent(PAYPAL_HANDLE)}/${total.toFixed(2)}`;
 
     /* The query is built by hand rather than with URLSearchParams, which
        encodes spaces as "+" — Venmo shows the note verbatim, plus signs and

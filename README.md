@@ -12,7 +12,7 @@ A tap-to-pay honor-system snack stand. Customers tap an NFC tag, pick what they 
 1. A customer taps their phone on the tag stuck to the snack container.
 2. Their phone opens the page, which loads the menu from `menu.json`.
 3. They tap the items they took, and a running total builds itself.
-4. One button hands off to Venmo with the amount and a plain-English itemized note already filled in.
+4. One button hands off to Venmo with the amount and a plain-English itemized note already filled in. A second button does the same through PayPal, once a PayPal.me handle is set.
 
 Because the tag only stores the page's URL, you never re-write a tag when prices change. You just change the menu.
 
@@ -137,7 +137,9 @@ The **editor** cannot be tested this way. The Worker only accepts requests from 
 ## Good to know
 
 - **Both pages adapt to light and dark mode** automatically.
-- **The pay button stays disabled** until at least one item is added, so nobody sends a zero payment.
+- **The pay buttons stay disabled** until at least one item is added, so nobody sends a zero payment.
+- **The PayPal button is off until you set a handle.** `index.html` has a `PAYPAL_HANDLE` constant near the top of its script; while it is empty the button is hidden entirely and Venmo is the only way to pay. Set it to the part after `paypal.me/` in your link. Unlike the Venmo username it is not in `menu.json`, so changing it means editing `index.html`.
+- **PayPal payments arrive without the itemized note.** PayPal.me links carry an amount and nothing else, so the note only rides along on Venmo. That is a PayPal limitation, not a bug here.
 - **The payment note is itemized** and written to read like a sentence, for example `E-Flight SNACKO: 2x Cookie and Soda`, so you can see what each sale was. It is prefixed with the stand name from `menu.json`, drops the `1x` for single items, and is trimmed at Venmo's 280-character limit.
 - **Sale prices are what customers are charged** — the total and the Venmo amount both use the discounted price.
 - **Item names are treated as plain text.** An apostrophe, an accent, or a stray `<` in a name shows up literally and cannot break the page.
@@ -150,7 +152,7 @@ The **editor** cannot be tested this way. The Worker only accepts requests from 
 
 | File | Purpose |
 |------|---------|
-| `index.html` | The customer page. Renders the menu, totals, and Venmo handoff. |
+| `index.html` | The customer page. Renders the menu, totals, and the Venmo and PayPal handoffs. |
 | `menu.json` | The menu itself. The only place menu data lives. |
 | `admin.html` | Password-protected menu editor. |
 | `manifest.json` | Makes the editor installable to a phone home screen. |
@@ -158,6 +160,8 @@ The **editor** cannot be tested this way. The Worker only accepts requests from 
 | `enjjpt-logo.png` | Squadron patch shown in the header (currently the 459th FTS Twin Dragons). |
 | `icon-192.png`, `icon-512.png` | Home-screen icons for the editor. |
 | `venmo-logo.png` | Venmo mark shown on the pay button. |
+| `paypal-mark.png` | PayPal monogram shown on the PayPal button, cropped square from `paypal_logo.png`. |
+| `paypal_logo.png` | Original full PayPal lockup. Kept as the source art; the page does not load it. |
 | `snacko-editor-spec.md` | The build specification the editor was written from. |
 | `.gitignore` | Keeps wrangler's local cache, which holds the Cloudflare account id, out of the repository. |
 | `README.md` | This document. |
