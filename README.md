@@ -26,18 +26,29 @@ Open `index.html` and edit the `CONFIG` block near the top. It is the only part 
 ```js
 const CONFIG = {
   name: "Snack-O",
-  tagline: "Tap what you grabbed, then pay in one tap.",
   venmoUsername: "your-venmo-username", // no @ symbol
-  items: [
-    { emoji: "🍫", name: "Chocolate bar", price: 2.00 },
-    { emoji: "🥤", name: "Soda",          price: 1.50 },
-    { emoji: "🍪", name: "Cookie",        price: 1.00 },
+  categories: [
+    {
+      label: "Drinks",
+      items: [
+        { name: "Red Bull",      price: 2.50 },
+        { name: "White Monster", price: 3.00 },
+        { name: "Water",         price: 1.00 },
+      ],
+    },
+    {
+      label: "Snacks",
+      items: [
+        { name: "Trail Mix", price: 1.50 },
+      ],
+    },
   ],
 };
 ```
 
 - **venmoUsername** is the handle without the `@`.
-- **items** is your menu. Add or remove lines freely, and set each `price` in dollars.
+- **categories** groups your menu into sections. Each section has a `label` and an `items` array.
+- Add or remove categories and items freely, and set each `price` in dollars.
 - Everything else, including the total and the Venmo note, updates on its own.
 
 You can edit this file right in the GitHub website: open `index.html`, click the pencil icon, make the change, and commit. The live page refreshes within about a minute.
@@ -89,4 +100,6 @@ Test the finished page on **both an iPhone and an Android** before sticking tags
 | File | Purpose |
 |------|---------|
 | `index.html` | The entire app. Menu, totals, and Venmo handoff in one self-contained file. |
+| `enjjpt-logo.png` | ENJJPT emblem shown in the header. |
+| `venmo-logo.png` | Venmo mark shown on the pay button. |
 | `README.md` | This document. |

@@ -8,205 +8,320 @@
 <!-- ============================================================= -->
 <!--  HOW TO CUSTOMIZE                                              -->
 <!--  1. Set VENMO_USERNAME below (no @ symbol).                   -->
-<!--  2. Edit the ITEMS list: name, price, and an emoji.           -->
-<!--  3. Optionally change the shop NAME and TAGLINE.              -->
-<!--  That's it. Commit the file and GitHub Pages does the rest.   -->
+<!--  2. Edit the CATEGORIES / items list.                         -->
 <!-- ============================================================= -->
 <script>
   const CONFIG = {
     name: "Snack-O",
-    tagline: "Tap what you grabbed, then pay in one tap.",
-    venmoUsername: "your-venmo-username", // <-- change this (no @)
-    items: [
-      { emoji: "🍫", name: "Chocolate bar", price: 2.00 },
-      { emoji: "🥤", name: "Soda",          price: 1.50 },
-      { emoji: "🍪", name: "Cookie",        price: 1.00 },
-      { emoji: "🥨", name: "Pretzels",      price: 1.75 },
-      { emoji: "🍬", name: "Candy",         price: 1.25 },
-      { emoji: "💧", name: "Water",         price: 1.00 },
+    venmoUsername: "your-venmo-username",
+    categories: [
+      {
+        label: "Drinks",
+        items: [
+          { name: "Red Bull",      price: 2.50 },
+          { name: "White Monster", price: 3.00 },
+          { name: "Water",         price: 1.00 },
+        ],
+      },
+      {
+        label: "Snacks",
+        items: [
+          { name: "Trail Mix",               price: 1.50 },
+          { name: "Luke's Homemade Granola", price: 1.50 },
+        ],
+      },
+      {
+        label: "Fruit",
+        items: [
+          { name: "Banana", price: 0.89 },
+        ],
+      },
     ],
   };
 </script>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --bg: #f4f5f7;
-    --card: #ffffff;
-    --ink: #14161a;
-    --muted: #6b7280;
-    --line: #e7e9ee;
-    --accent: #008cff;      /* Venmo blue */
-    --accent-press: #0074d4;
-    --shadow: 0 1px 2px rgba(20,22,26,.05), 0 8px 24px rgba(20,22,26,.06);
-    --radius: 18px;
+    --bg:     #F3EFE5;
+    --panel:  #FBF8F0;
+    --ink:    #1A1C22;
+    --muted:  #7A7365;
+    --rule:   #CFC8B7;
+    --rule-2: #E6E1D2;
+    --accent: #D96B4A;         /* warm coral — used for pay + minus hover */
+    --accent-press: #B7532F;
+    --accent-tint: #FBEAE0;
+    --blue: #3A7BD5;           /* selection blue — active row + plus hover */
+    --blue-tint: #E4EEFB;
+    --venmo: #008CFF;
+    --shadow: 0 1px 2px rgba(20,22,26,.04), 0 6px 18px rgba(20,22,26,.05);
+    --radius: 12px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0e0f12;
-      --card: #17191e;
-      --ink: #f3f4f6;
-      --muted: #9aa1ad;
-      --line: #262a31;
-      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 30px rgba(0,0,0,.45);
+      --bg:     #14161A;
+      --panel:  #1D2026;
+      --ink:    #EFE9DA;
+      --muted:  #8F8877;
+      --rule:   #3B3E46;
+      --rule-2: #292C33;
+      --accent-tint: #3A2018;
+      --blue-tint: #172436;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.35);
     }
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--ink);
-    line-height: 1.4;
+    line-height: 1.35;
     -webkit-font-smoothing: antialiased;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
   }
 
-  .wrap {
-    max-width: 460px;
-    margin: 0 auto;
-    padding: 28px 18px 160px;
-  }
+  .wrap { max-width: 520px; margin: 0 auto; padding: 22px 18px 200px; }
 
-  header { text-align: center; margin: 8px 0 22px; }
-  .logo {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 60px; height: 60px; border-radius: 16px;
-    background: linear-gradient(135deg, var(--accent), #4db4ff);
-    font-size: 30px; box-shadow: var(--shadow); margin-bottom: 12px;
-  }
-  h1 { font-size: 26px; font-weight: 750; letter-spacing: -.02em; margin: 0 0 4px; }
-  .tagline { color: var(--muted); font-size: 14.5px; margin: 0; }
-
-  .list { display: flex; flex-direction: column; gap: 10px; }
-
-  .item {
+  /* Header */
+  header {
     display: flex; align-items: center; gap: 14px;
-    background: var(--card);
-    border: 1px solid var(--line);
+    padding: 4px 4px 20px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .mark { width: 56px; height: 56px; object-fit: contain; flex: 0 0 56px; }
+  h1 {
+    font-size: 26px; font-weight: 700; letter-spacing: -.015em;
+    margin: 0; line-height: 1;
+  }
+
+  /* Category sections */
+  .cat + .cat { margin-top: 22px; }
+  .cat-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 4px 8px;
+  }
+  .cat-title {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .cat-rule { flex: 1 1 auto; height: 1px; background: var(--rule-2); }
+
+  /* Item rows — soft cards with ledger interior */
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--panel);
+    border: 1px solid var(--rule-2);
     border-radius: var(--radius);
-    padding: 14px 16px;
     box-shadow: var(--shadow);
-    transition: border-color .18s ease, transform .06s ease;
+    transition: border-color .18s ease, background .18s ease;
   }
-  .item.active { border-color: var(--accent); }
-  .item .emoji {
-    font-size: 26px; width: 40px; height: 40px; flex: 0 0 40px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--bg); border-radius: 12px;
-  }
-  .item .meta { flex: 1 1 auto; min-width: 0; }
-  .item .name { font-weight: 620; font-size: 16px; }
-  .item .price { color: var(--muted); font-size: 13.5px; margin-top: 1px; }
-
-  .stepper { display: flex; align-items: center; gap: 6px; }
-  .stepper button {
-    width: 38px; height: 38px; border-radius: 11px;
-    border: 1px solid var(--line); background: var(--bg);
-    color: var(--ink); font-size: 21px; font-weight: 500;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; user-select: none;
-    transition: transform .06s ease, background .15s ease, opacity .15s ease;
-  }
-  .stepper button:active { transform: scale(.9); }
-  .stepper button.minus { opacity: .35; pointer-events: none; }
-  .item.active .stepper button.minus { opacity: 1; pointer-events: auto; }
-  .stepper .qty {
-    min-width: 22px; text-align: center;
-    font-variant-numeric: tabular-nums; font-weight: 700; font-size: 16px;
+  .item.active {
+    border-color: var(--blue);
+    background: var(--blue-tint);
   }
 
-  /* Sticky pay bar */
+  .name-lead {
+    display: flex; align-items: baseline; gap: 8px;
+    min-width: 0; overflow: hidden;
+  }
+  .name {
+    font-size: 15.5px; font-weight: 550;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex: 0 1 auto;
+  }
+  .lead {
+    flex: 1 1 auto; height: 1px; min-width: 12px;
+    background-image: radial-gradient(circle, var(--rule) 1px, transparent 1.2px);
+    background-size: 6px 2px; background-repeat: repeat-x;
+    background-position: left center;
+    transform: translateY(-3px);
+  }
+  .price {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 14px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  /* Stepper — friendlier rounded, but still POS-clean */
+  .qty { display: flex; align-items: center; gap: 6px; }
+  .qty button {
+    width: 34px; height: 34px; border-radius: 9px;
+    border: 1px solid var(--rule); background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 18px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 0;
+    transition: background .15s ease, opacity .15s ease, border-color .15s ease;
+  }
+  .qty button:hover { background: var(--panel); }
+  .qty .plus:hover  { border-color: var(--blue); }
+  .qty .minus:hover { border-color: var(--accent); }
+  .qty .plus:focus-visible  { outline: 2px solid var(--blue);   outline-offset: 2px; }
+  .qty .minus:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .qty .minus[disabled] {
+    opacity: .35; pointer-events: none; border-color: var(--rule-2);
+  }
+  .qty .q-num {
+    min-width: 20px; text-align: center;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 14px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Sticky totals bar */
   .bar {
     position: fixed; left: 0; right: 0; bottom: 0;
     padding: 14px 18px calc(16px + env(safe-area-inset-bottom));
-    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
     backdrop-filter: saturate(180%) blur(14px);
     -webkit-backdrop-filter: saturate(180%) blur(14px);
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--rule);
   }
-  .bar .inner { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-  .totrow { display: flex; align-items: baseline; justify-content: space-between; padding: 0 2px; }
-  .totrow .label { color: var(--muted); font-size: 14px; }
-  .totrow .amount { font-size: 24px; font-weight: 780; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .bar .inner { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+  .tot-lines { display: flex; flex-direction: column; gap: 4px; }
+  .tot-lines .line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .tot-lines .line .val {
+    color: var(--ink); font-variant-numeric: tabular-nums;
+    letter-spacing: normal; text-transform: none;
+  }
+  .tot-lines .line.total {
+    padding-top: 8px; border-top: 1px dashed var(--rule);
+    font-size: 12.5px; color: var(--ink);
+  }
+  .tot-lines .line.total .val { font-size: 24px; font-weight: 600; }
 
   .pay {
-    display: flex; align-items: center; justify-content: center; gap: 9px;
-    width: 100%; padding: 17px; border: none; border-radius: 15px;
-    background: var(--accent); color: #fff;
-    font-size: 17px; font-weight: 700; font-family: inherit;
-    cursor: pointer; text-decoration: none;
-    transition: transform .06s ease, background .15s ease, opacity .2s ease;
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; padding: 19px 22px;
+    border: none; border-radius: 14px;
+    background: var(--ink); color: var(--bg);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 17px; font-weight: 600;
+    letter-spacing: .04em;
+    text-decoration: none; cursor: pointer;
+    transition: background .18s ease, color .18s ease;
   }
-  .pay:active { transform: scale(.985); background: var(--accent-press); }
-  .pay.disabled { opacity: .45; pointer-events: none; }
-  .pay .v { font-weight: 800; }
+  .pay:hover { background: var(--venmo); color: #fff; }
+  .pay:focus-visible { outline: 2px solid var(--venmo); outline-offset: 2px; }
+  .pay.disabled { background: var(--rule); color: var(--muted); pointer-events: none; }
+  .pay .arrow { font-family: 'IBM Plex Mono', monospace; font-size: 18px; }
 
-  .hint { text-align: center; color: var(--muted); font-size: 12px; margin: 14px 2px 0; }
-  .hint a { color: var(--muted); }
+  .pay .label { display: inline-flex; align-items: center; gap: 12px; }
+  .venmo-logo {
+    width: 26px; height: 26px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 7px; padding: 2px;
+    background: transparent;
+    transition: background .18s ease;
+  }
+  .venmo-logo img { width: 100%; height: 100%; display: block; }
+  .pay:hover .venmo-logo { background: #fff; }
+  .pay.disabled .venmo-logo { opacity: .5; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="logo" id="logo">🍿</div>
-      <h1 id="shopName">Snack-O</h1>
-      <p class="tagline" id="tagline"></p>
+      <img class="mark" src="enjjpt-logo.png" alt="ENJJPT emblem" />
+      <h1>Snack-O</h1>
     </header>
 
-    <div class="list" id="list"></div>
-
-    <p class="hint">You pay for what you tap. Prices are per item — add as many as you took.</p>
+    <div id="menu"></div>
   </div>
 
   <div class="bar">
     <div class="inner">
-      <div class="totrow">
-        <span class="label" id="count">No items yet</span>
-        <span class="amount" id="total">$0.00</span>
+      <div class="tot-lines">
+        <div class="line"><span>Items</span><span class="val" id="count">0</span></div>
+        <div class="line total"><span>Total</span><span class="val" id="total">$0.00</span></div>
       </div>
       <a class="pay disabled" id="payBtn" href="#">
-        Pay with <span class="v">Venmo</span>
+        <span class="label">
+          <span class="venmo-logo" aria-hidden="true">
+            <img src="venmo-logo.png" alt="" />
+          </span>
+          <span>Pay with Venmo</span>
+        </span>
+        <span class="arrow">→</span>
       </a>
     </div>
   </div>
 
 <script>
   const money = n => "$" + n.toFixed(2);
-  const state = CONFIG.items.map(it => ({ ...it, qty: 0 }));
+  const state = [];
+  CONFIG.categories.forEach(cat => cat.items.forEach(it => state.push({ ...it, qty: 0 })));
 
-  // Header text
   document.title = CONFIG.name;
-  document.getElementById("shopName").textContent = CONFIG.name;
-  document.getElementById("tagline").textContent = CONFIG.tagline;
 
-  const list = document.getElementById("list");
+  const menu = document.getElementById("menu");
+  let idx = 0;
 
-  state.forEach((it, i) => {
-    const row = document.createElement("div");
-    row.className = "item";
-    row.innerHTML = `
-      <div class="emoji">${it.emoji}</div>
-      <div class="meta">
-        <div class="name">${it.name}</div>
-        <div class="price">${money(it.price)} each</div>
+  CONFIG.categories.forEach(cat => {
+    const section = document.createElement("section");
+    section.className = "cat";
+    section.innerHTML = `
+      <div class="cat-head">
+        <span class="cat-title">${cat.label}</span>
+        <span class="cat-rule"></span>
       </div>
-      <div class="stepper">
-        <button class="minus" aria-label="Remove one">−</button>
-        <span class="qty">0</span>
-        <button class="plus" aria-label="Add one">+</button>
-      </div>`;
-    const qtyEl = row.querySelector(".qty");
-    const minus = row.querySelector(".minus");
-    row.querySelector(".plus").addEventListener("click", () => { it.qty++; sync(row, it, qtyEl, minus); });
-    minus.addEventListener("click", () => { if (it.qty > 0) it.qty--; sync(row, it, qtyEl, minus); });
-    list.appendChild(row);
+      <div class="list"></div>`;
+    const list = section.querySelector(".list");
+
+    cat.items.forEach(() => {
+      const it = state[idx++];
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `
+        <span class="name-lead">
+          <span class="name">${it.name}</span>
+          <span class="lead" aria-hidden="true"></span>
+        </span>
+        <span class="price">${it.price.toFixed(2)}</span>
+        <div class="qty">
+          <button class="minus" aria-label="Remove one" disabled>−</button>
+          <span class="q-num">0</span>
+          <button class="plus" aria-label="Add one">+</button>
+        </div>`;
+      const qtyEl = row.querySelector(".q-num");
+      const minus = row.querySelector(".minus");
+      row.querySelector(".plus").addEventListener("click", () => { it.qty++; sync(row, it, qtyEl, minus); });
+      minus.addEventListener("click", () => { if (it.qty > 0) it.qty--; sync(row, it, qtyEl, minus); });
+      list.appendChild(row);
+    });
+
+    menu.appendChild(section);
   });
 
   function sync(row, it, qtyEl, minus) {
     qtyEl.textContent = it.qty;
     row.classList.toggle("active", it.qty > 0);
-    minus.classList.toggle("minus", it.qty === 0);
+    minus.disabled = it.qty === 0;
     updateTotals();
   }
 
@@ -218,8 +333,7 @@
     const total = state.reduce((s, it) => s + it.qty * it.price, 0);
     const count = state.reduce((s, it) => s + it.qty, 0);
     totalEl.textContent = money(total);
-    countEl.textContent = count === 0 ? "No items yet"
-                        : count + (count === 1 ? " item" : " items");
+    countEl.textContent = count;
 
     if (total <= 0) {
       payBtn.classList.add("disabled");
@@ -228,7 +342,6 @@
     }
     payBtn.classList.remove("disabled");
 
-    // Build a short note listing what was bought, e.g. "2x Cookie, 1x Soda"
     const note = state.filter(it => it.qty > 0)
                       .map(it => it.qty + "x " + it.name)
                       .join(", ");
