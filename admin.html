@@ -1122,6 +1122,23 @@ function describeChanges(before, after) {
     if (!a.has(name) && catsAfter.includes(rec.cat)) out.push(`removed ${name}`);
   });
 
+  /* Reordering changes nothing about any single item, so compare sequences too.
+     Without this, a save that only moves rows around reads as "no change". */
+  const common = catsAfter.filter(l => catsBefore.includes(l));
+  if (common.join(" ") !== catsBefore.filter(l => catsAfter.includes(l)).join(" ")) {
+    out.push("reordered categories");
+  }
+  common.forEach(label => {
+    const names = menu => {
+      const cat = menu.categories.find(c => c.label === label);
+      return cat ? cat.items.map(i => i.name) : [];
+    };
+    const nb = names(before), na = names(after);
+    const shared = new Set(nb.filter(n => na.includes(n)));
+    const seq = list => list.filter(n => shared.has(n)).join(" ");
+    if (seq(nb) !== seq(na)) out.push(`reordered ${label}`);
+  });
+
   return out;
 }
 
