@@ -321,6 +321,7 @@
 
   let state = [];
   let venmoUsername = "";
+  let standName = "";
 
   function el(tag, className, text) {
     const n = document.createElement(tag);
@@ -351,6 +352,7 @@
     const h1 = document.querySelector("h1");
     if (menu.name) h1.textContent = menu.name;
     venmoUsername = menu.venmoUsername || "";
+    standName = menu.name || "";
 
     let anyVisible = false;
 
@@ -450,16 +452,31 @@
     }
     payBtn.classList.remove("disabled");
 
-    const note = state.filter(it => it.qty > 0)
-                      .map(it => it.qty + "x " + it.name)
-                      .join(", ");
+    /* The query is built by hand rather than with URLSearchParams, which
+       encodes spaces as "+" — Venmo shows the note verbatim, plus signs and
+       all. encodeURIComponent uses %20, which Venmo renders as a space. */
+    const query = [
+      "txn=pay",
+      "amount=" + encodeURIComponent(total.toFixed(2)),
+      "note="   + encodeURIComponent(buildNote()),
+    ].join("&");
+    payBtn.href = `https://venmo.com/${encodeURIComponent(venmoUsername)}?${query}`;
+  }
 
-    const params = new URLSearchParams({
-      txn: "pay",
-      amount: total.toFixed(2),
-      note: note,
-    });
-    payBtn.href = `https://venmo.com/${encodeURIComponent(venmoUsername)}?${params.toString()}`;
+  /* Reads like a sentence rather than a receipt dump: the "1x" is dropped for
+     single items and the last one is joined with "and". */
+  function buildNote() {
+    const parts = state.filter(it => it.qty > 0)
+                       .map(it => (it.qty > 1 ? it.qty + "x " : "") + it.name);
+
+    let list;
+    if (parts.length === 1)      list = parts[0];
+    else if (parts.length === 2) list = parts[0] + " and " + parts[1];
+    else                         list = parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+
+    const note = standName ? `${standName}: ${list}` : list;
+    /* Venmo caps the note at 280 characters and silently drops the rest. */
+    return note.length > 280 ? note.slice(0, 277) + "..." : note;
   }
 
   async function load() {

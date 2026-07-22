@@ -12,7 +12,7 @@ A tap-to-pay honor-system snack stand. Customers tap an NFC tag, pick what they 
 1. A customer taps their phone on the tag stuck to the snack container.
 2. Their phone opens the page, which loads the menu from `menu.json`.
 3. They tap the items they took, and a running total builds itself.
-4. One button hands off to Venmo with the amount and an itemized note already filled in.
+4. One button hands off to Venmo with the amount and a plain-English itemized note already filled in.
 
 Because the tag only stores the page's URL, you never re-write a tag when prices change. You just change the menu.
 
@@ -138,9 +138,10 @@ The **editor** cannot be tested this way. The Worker only accepts requests from 
 
 - **Both pages adapt to light and dark mode** automatically.
 - **The pay button stays disabled** until at least one item is added, so nobody sends a zero payment.
-- **The payment note is itemized**, for example `2x Cookie, 1x Soda`, so you can see what each sale was.
+- **The payment note is itemized** and written to read like a sentence, for example `E-Flight SNACKO: 2x Cookie and Soda`, so you can see what each sale was. It is prefixed with the stand name from `menu.json`, drops the `1x` for single items, and is trimmed at Venmo's 280-character limit.
 - **Sale prices are what customers are charged** — the total and the Venmo amount both use the discounted price.
 - **Item names are treated as plain text.** An apostrophe, an accent, or a stray `<` in a name shows up literally and cannot break the page.
+- **The Venmo link is built with `encodeURIComponent`, not `URLSearchParams`.** `URLSearchParams` encodes spaces as `+`, and Venmo prints the note exactly as given — plus signs and all. If the note ever comes back full of `+`, that is why.
 - **Venmo's amount-prefill through links is undocumented** and has changed over the years. It works today, but if it ever breaks, the fix is on this page, not on the physical tags.
 
 ---
@@ -154,7 +155,7 @@ The **editor** cannot be tested this way. The Worker only accepts requests from 
 | `admin.html` | Password-protected menu editor. |
 | `manifest.json` | Makes the editor installable to a phone home screen. |
 | `worker/` | Cloudflare Worker that holds the GitHub token and does the committing. |
-| `enjjpt-logo.png` | ENJJPT emblem shown in the header. |
+| `enjjpt-logo.png` | Squadron patch shown in the header (currently the 459th FTS Twin Dragons). |
 | `icon-192.png`, `icon-512.png` | Home-screen icons for the editor. |
 | `venmo-logo.png` | Venmo mark shown on the pay button. |
 | `snacko-editor-spec.md` | The build specification the editor was written from. |
