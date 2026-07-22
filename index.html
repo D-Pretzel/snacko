@@ -6,39 +6,9 @@
 <title>Snack-O</title>
 
 <!-- ============================================================= -->
-<!--  HOW TO CUSTOMIZE                                              -->
-<!--  1. Set VENMO_USERNAME below (no @ symbol).                   -->
-<!--  2. Edit the CATEGORIES / items list.                         -->
+<!--  The menu lives in menu.json, not in this file.                -->
+<!--  Edit it from admin.html, or edit menu.json directly on GitHub. -->
 <!-- ============================================================= -->
-<script>
-  const CONFIG = {
-    name: "Snack-O",
-    venmoUsername: "your-venmo-username",
-    categories: [
-      {
-        label: "Drinks",
-        items: [
-          { name: "Red Bull",      price: 2.50 },
-          { name: "White Monster", price: 3.00 },
-          { name: "Water",         price: 1.00 },
-        ],
-      },
-      {
-        label: "Snacks",
-        items: [
-          { name: "Trail Mix",               price: 1.50 },
-          { name: "Luke's Homemade Granola", price: 1.50 },
-        ],
-      },
-      {
-        label: "Fruit",
-        items: [
-          { name: "Banana", price: 0.89 },
-        ],
-      },
-    ],
-  };
-</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,7 +89,7 @@
   .list { display: flex; flex-direction: column; gap: 8px; }
   .item {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
@@ -157,6 +127,31 @@
     color: var(--ink);
   }
 
+  /* Description — muted second line under the name */
+  .name-block { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .desc {
+    font-size: 12.5px; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Sale pricing — stacked so the tag never steals width from the item name */
+  .price-block { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .price-line { display: flex; align-items: baseline; gap: 7px; }
+  .price.was {
+    color: var(--muted);
+    text-decoration: line-through;
+    font-size: 12.5px;
+  }
+  .sale-tag {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px; font-weight: 500; letter-spacing: .08em;
+    color: var(--accent);
+    background: var(--accent-tint);
+    border-radius: 6px;
+    padding: 2px 5px;
+    white-space: nowrap;
+  }
+
   /* Stepper — friendlier rounded, but still POS-clean */
   .qty { display: flex; align-items: center; gap: 6px; }
   .qty button {
@@ -183,6 +178,26 @@
     font-size: 14px; font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
+
+  /* Loading + error states */
+  .state {
+    padding: 28px 18px; text-align: center;
+    background: var(--panel);
+    border: 1px solid var(--rule-2);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .state p { margin: 0 0 4px; }
+  .state .hint { font-size: 13px; color: var(--muted); }
+  .retry {
+    margin-top: 16px;
+    padding: 11px 20px; border-radius: 10px;
+    border: 1px solid var(--rule); background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 15px; font-weight: 500;
+    cursor: pointer;
+  }
+  .retry:hover { border-color: var(--accent); }
+  .retry:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* Sticky totals bar */
   .bar {
@@ -251,7 +266,9 @@
       <h1>Snack-O</h1>
     </header>
 
-    <div id="menu"></div>
+    <div id="menu">
+      <div class="state"><p>Loading menu…</p></div>
+    </div>
   </div>
 
   <div class="bar">
@@ -274,60 +291,151 @@
 
 <script>
   const money = n => "$" + n.toFixed(2);
-  const state = [];
-  CONFIG.categories.forEach(cat => cat.items.forEach(it => state.push({ ...it, qty: 0 })));
 
-  document.title = CONFIG.name;
-
-  const menu = document.getElementById("menu");
-  let idx = 0;
-
-  CONFIG.categories.forEach(cat => {
-    const section = document.createElement("section");
-    section.className = "cat";
-    section.innerHTML = `
-      <div class="cat-head">
-        <span class="cat-title">${cat.label}</span>
-        <span class="cat-rule"></span>
-      </div>
-      <div class="list"></div>`;
-    const list = section.querySelector(".list");
-
-    cat.items.forEach(() => {
-      const it = state[idx++];
-      const row = document.createElement("div");
-      row.className = "item";
-      row.innerHTML = `
-        <span class="name-lead">
-          <span class="name">${it.name}</span>
-          <span class="lead" aria-hidden="true"></span>
-        </span>
-        <span class="price">${it.price.toFixed(2)}</span>
-        <div class="qty">
-          <button class="minus" aria-label="Remove one" disabled>−</button>
-          <span class="q-num">0</span>
-          <button class="plus" aria-label="Add one">+</button>
-        </div>`;
-      const qtyEl = row.querySelector(".q-num");
-      const minus = row.querySelector(".minus");
-      row.querySelector(".plus").addEventListener("click", () => { it.qty++; sync(row, it, qtyEl, minus); });
-      minus.addEventListener("click", () => { if (it.qty > 0) it.qty--; sync(row, it, qtyEl, minus); });
-      list.appendChild(row);
-    });
-
-    menu.appendChild(section);
-  });
-
-  function sync(row, it, qtyEl, minus) {
-    qtyEl.textContent = it.qty;
-    row.classList.toggle("active", it.qty > 0);
-    minus.disabled = it.qty === 0;
-    updateTotals();
+  /* Today as YYYY-MM-DD in local time, so a sale ending "today" is still on. */
+  function todayLocalISO() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   }
 
+  /* An expired sale is ignored, not removed from the file. */
+  function activeSale(item) {
+    const s = item.sale;
+    if (!s || typeof s.percentOff !== "number") return null;
+    if (!(s.percentOff >= 1 && s.percentOff <= 99)) return null;
+    if (s.until && String(s.until) < todayLocalISO()) return null;
+    return s;
+  }
+
+  function effectivePrice(item) {
+    const s = activeSale(item);
+    if (!s) return item.price;
+    return Math.round(item.price * (1 - s.percentOff / 100) * 100) / 100;
+  }
+
+  const menuEl  = document.getElementById("menu");
   const totalEl = document.getElementById("total");
   const countEl = document.getElementById("count");
   const payBtn  = document.getElementById("payBtn");
+
+  let state = [];
+  let venmoUsername = "";
+
+  function el(tag, className, text) {
+    const n = document.createElement(tag);
+    if (className) n.className = className;
+    if (text !== undefined) n.textContent = text;
+    return n;
+  }
+
+  function showState(message, hint, withRetry) {
+    state = [];
+    updateTotals();
+    menuEl.replaceChildren();
+    const box = el("div", "state");
+    box.appendChild(el("p", null, message));
+    if (hint) box.appendChild(el("p", "hint", hint));
+    if (withRetry) {
+      const btn = el("button", "retry", "Try again");
+      btn.addEventListener("click", load);
+      box.appendChild(btn);
+    }
+    menuEl.appendChild(box);
+  }
+
+  function render(menu) {
+    state = [];
+    menuEl.replaceChildren();
+    document.title = menu.name || "Snack-O";
+    const h1 = document.querySelector("h1");
+    if (menu.name) h1.textContent = menu.name;
+    venmoUsername = menu.venmoUsername || "";
+
+    let anyVisible = false;
+
+    (menu.categories || []).forEach(cat => {
+      const items = (cat.items || []).filter(it => !it.hidden);
+      if (items.length === 0) return;   // skip empty categories
+      anyVisible = true;
+
+      const section = el("section", "cat");
+      const head = el("div", "cat-head");
+      head.appendChild(el("span", "cat-title", cat.label || ""));
+      const rule = el("span", "cat-rule");
+      rule.setAttribute("aria-hidden", "true");
+      head.appendChild(rule);
+      section.appendChild(head);
+
+      const list = el("div", "list");
+      items.forEach(item => {
+        const entry = { name: item.name, price: effectivePrice(item), qty: 0 };
+        state.push(entry);
+        list.appendChild(itemRow(item, entry));
+      });
+      section.appendChild(list);
+      menuEl.appendChild(section);
+    });
+
+    if (!anyVisible) {
+      showState("Nothing for sale right now.", "Check back soon.", false);
+      return;
+    }
+    updateTotals();
+  }
+
+  function itemRow(item, entry) {
+    const row = el("div", "item");
+
+    /* Name (+ optional description) */
+    const nameBlock = el("div", "name-block");
+    const nameLead = el("span", "name-lead");
+    nameLead.appendChild(el("span", "name", item.name));
+    const lead = el("span", "lead");
+    lead.setAttribute("aria-hidden", "true");
+    nameLead.appendChild(lead);
+    nameBlock.appendChild(nameLead);
+    if (item.description && String(item.description).trim() !== "") {
+      nameBlock.appendChild(el("span", "desc", item.description));
+    }
+    row.appendChild(nameBlock);
+
+    /* Price, with sale treatment when one is running */
+    const sale = activeSale(item);
+    const priceBlock = el("div", "price-block");
+    if (sale) {
+      priceBlock.appendChild(el("span", "sale-tag", sale.percentOff + "% OFF"));
+      const line = el("span", "price-line");
+      line.appendChild(el("span", "price was", item.price.toFixed(2)));
+      line.appendChild(el("span", "price", entry.price.toFixed(2)));
+      priceBlock.appendChild(line);
+    } else {
+      priceBlock.appendChild(el("span", "price", entry.price.toFixed(2)));
+    }
+    row.appendChild(priceBlock);
+
+    /* Stepper */
+    const qty = el("div", "qty");
+    const minus = el("button", "minus", "−");
+    minus.setAttribute("aria-label", "Remove one " + item.name);
+    minus.disabled = true;
+    const num = el("span", "q-num", "0");
+    const plus = el("button", "plus", "+");
+    plus.setAttribute("aria-label", "Add one " + item.name);
+    qty.append(minus, num, plus);
+    row.appendChild(qty);
+
+    const sync = () => {
+      num.textContent = entry.qty;
+      row.classList.toggle("active", entry.qty > 0);
+      minus.disabled = entry.qty === 0;
+      updateTotals();
+    };
+    plus.addEventListener("click", () => { entry.qty++; sync(); });
+    minus.addEventListener("click", () => { if (entry.qty > 0) entry.qty--; sync(); });
+
+    return row;
+  }
 
   function updateTotals() {
     const total = state.reduce((s, it) => s + it.qty * it.price, 0);
@@ -351,10 +459,29 @@
       amount: total.toFixed(2),
       note: note,
     });
-    payBtn.href = `https://venmo.com/${encodeURIComponent(CONFIG.venmoUsername)}?${params.toString()}`;
+    payBtn.href = `https://venmo.com/${encodeURIComponent(venmoUsername)}?${params.toString()}`;
   }
 
-  updateTotals();
+  async function load() {
+    showState("Loading menu…", null, false);
+    try {
+      /* Cache-busted: GitHub Pages sits behind a CDN, and without this a price
+         change can take several minutes to show up. */
+      const res = await fetch(`menu.json?v=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const menu = await res.json();
+      if (!menu || !Array.isArray(menu.categories)) throw new Error("Malformed menu");
+      render(menu);
+    } catch (err) {
+      showState(
+        "Couldn't load the menu.",
+        "Check your connection and try again. (" + err.message + ")",
+        true
+      );
+    }
+  }
+
+  load();
 </script>
 </body>
 </html>

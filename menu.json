@@ -1,0 +1,27 @@
+{
+  "name": "Snack-O",
+  "venmoUsername": "your-venmo-username",
+  "categories": [
+    {
+      "label": "Drinks",
+      "items": [
+        { "name": "Red Bull", "price": 2.5 },
+        { "name": "White Monster", "price": 3 },
+        { "name": "Water", "price": 1 }
+      ]
+    },
+    {
+      "label": "Snacks",
+      "items": [
+        { "name": "Trail Mix", "price": 1.5 },
+        { "name": "Luke's Homemade Granola", "price": 1.5 }
+      ]
+    },
+    {
+      "label": "Fruit",
+      "items": [
+        { "name": "Banana", "price": 0.89 }
+      ]
+    }
+  ]
+}

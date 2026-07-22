@@ -1,0 +1,11 @@
+# Wrangler's local cache. Holds the Cloudflare account id and login state,
+# which are machine-local and have no business in a public repository.
+.wrangler/
+.dev.vars
+
+# Node, if it ever shows up here
+node_modules/
+*.log
+
+# macOS
+.DS_Store

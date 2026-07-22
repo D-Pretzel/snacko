@@ -1,0 +1,11 @@
+name = "snacko"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://d-pretzel.github.io"
+GH_REPO = "D-Pretzel/snacko"
+
+# Secrets are NOT set here. Set them once with wrangler, and they stay encrypted:
+#   wrangler secret put GH_TOKEN
+#   wrangler secret put EDIT_PASSWORD
