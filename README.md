@@ -2,8 +2,8 @@
 
 A tap-to-pay honor-system snack stand. Customers tap an NFC tag, pick what they grabbed, and pay through Venmo in a single tap. No Square, no card reader, no monthly fees.
 
-**Live page:** https://d-pretzel.github.io/snacko/
-**Menu editor:** https://d-pretzel.github.io/snacko/admin.html
+- **Live page:** https://d-pretzel.github.io/snacko/
+- **Menu editor:** https://d-pretzel.github.io/snacko/admin.html
 
 ---
 
@@ -33,13 +33,11 @@ You can:
 - Hide an item without deleting it, for when you are out of stock
 - Preview the customer view before you save
 
-Press **Save changes**. The live page catches up within about a minute.
-
-On a phone, use your browser's **Add to Home Screen** on the editor page. It installs with an icon and opens without browser chrome, like an app.
+Press **Save changes**. The live page catches up within about a minute. If a field is wrong, it is highlighted with the reason and nothing is sent until it is fixed. If a save fails — bad signal, usually — every edit stays on screen, so nothing is lost; press Save again.
 
 ### Add to Home Screen
 
-The editor ships a `manifest.json` and an app icon, so "Add to Home Screen" produces a real icon rather than a screenshot of the page. On iOS use Share → Add to Home Screen; on Android, the browser menu offers Install.
+Worth doing on the first visit. The editor ships a `manifest.json` and an app icon, so this produces a real icon and opens without browser chrome, like an app. On iOS use Share → Add to Home Screen; on Android, the browser menu offers Install.
 
 ### Sales
 
@@ -77,17 +75,11 @@ Every past version of the menu is in the repository's commit history, so a bad e
 
 ---
 
-## Deploying with GitHub Pages
+## Hosting
 
-One-time setup:
+Already configured, and there is no build step. GitHub Pages serves this repository's root from the `main` branch, so anything committed to `main` is live at `https://d-pretzel.github.io/snacko/` within about a minute. The setting is under **Settings → Pages**: source **Deploy from a branch**, branch `main`, folder `/ (root)`.
 
-1. Make sure `index.html` and `menu.json` are in the root of this repository.
-2. Go to **Settings → Pages**.
-3. Under **Build and deployment**, set the source to **Deploy from a branch**.
-4. Choose the `main` branch and the `/ (root)` folder, then save.
-5. Wait about a minute. The page goes live at `https://d-pretzel.github.io/snacko/`.
-
-There is no build step.
+`index.html` and `menu.json` must stay in the repository root, since the page fetches `menu.json` as a relative path.
 
 ---
 
@@ -138,6 +130,8 @@ python3 -m http.server 8000
 
 Then open `http://localhost:8000/`.
 
+The **editor** cannot be tested this way. The Worker only accepts requests from `https://d-pretzel.github.io`, so `admin.html` served from localhost is refused — that is the origin check doing its job, not a bug. Test the editor at its live URL, or see [`worker/README.md`](worker/README.md) for temporarily pointing `ALLOWED_ORIGIN` at a local server.
+
 ---
 
 ## Good to know
@@ -163,4 +157,6 @@ Then open `http://localhost:8000/`.
 | `enjjpt-logo.png` | ENJJPT emblem shown in the header. |
 | `icon-192.png`, `icon-512.png` | Home-screen icons for the editor. |
 | `venmo-logo.png` | Venmo mark shown on the pay button. |
+| `snacko-editor-spec.md` | The build specification the editor was written from. |
+| `.gitignore` | Keeps wrangler's local cache, which holds the Cloudflare account id, out of the repository. |
 | `README.md` | This document. |
