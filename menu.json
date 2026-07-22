@@ -1,7 +1,20 @@
 {
-  "name": "Snack-O",
+  "name": "E-Flight SNACKO",
   "venmoUsername": "SNACKO_27-06",
   "categories": [
+    {
+      "label": "Snacks",
+      "items": [
+        {
+          "name": "Trail Mix",
+          "price": 1.5
+        },
+        {
+          "name": "Luke's Homemade Granola",
+          "price": 1.5
+        }
+      ]
+    },
     {
       "label": "Drinks",
       "items": [
@@ -19,19 +32,6 @@
         {
           "name": "Water",
           "price": 1
-        }
-      ]
-    },
-    {
-      "label": "Snacks",
-      "items": [
-        {
-          "name": "Trail Mix",
-          "price": 1.5
-        },
-        {
-          "name": "Luke's Homemade Granola",
-          "price": 1.5
         }
       ]
     },
